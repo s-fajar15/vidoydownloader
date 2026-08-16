@@ -163,9 +163,7 @@ function App() {
         </div>
       </section>
 
-      <footer className="footer-band text-center mt-auto">
-        <span>&copy; {new Date().getFullYear()} Vidoy Downloader by s.fajar15. All rights reserved.</span>
-      </footer>
+      
 
     </div>
   );
