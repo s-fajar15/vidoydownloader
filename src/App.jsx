@@ -28,7 +28,7 @@ function App() {
       if (response.ok && data.sourceUrl) {
         setVideoData(data);
       } else {
-        setErrorMsg(data.error || 'Gagal mengekstrak video');
+        setErrorMsg(data.error || 'Gagal memproses tautan video');
       }
     } catch (err) {
       setErrorMsg('Kesalahan koneksi ke server.');
@@ -39,8 +39,14 @@ function App() {
 
   const handleDownload = () => {
     if (!videoData || !videoData.sourceUrl) return;
-    const downloadUrl = `${API_BASE_URL}/download?url=${encodeURIComponent(videoData.sourceUrl)}&title=${encodeURIComponent(videoData.title || '')}&id=${encodeURIComponent(videoData.id)}`;
-    window.location.href = downloadUrl;
+    const params = new URLSearchParams({
+      url: videoData.sourceUrl,
+      title: videoData.title || '',
+      isDirect: videoData.isDirect,
+      headers: JSON.stringify(videoData.dlHeaders || {})
+    });
+    
+    window.location.href = `${API_BASE_URL}/download?${params.toString()}`;
   };
 
   return (
@@ -49,7 +55,7 @@ function App() {
       <nav className="navbar navbar-expand-lg bg-canvas py-3 px-4 border-bottom border-light">
         <div className="container-fluid max-w-1280">
           <a className="navbar-brand fw-bold text-ink d-flex align-items-center" href="#">
-            Vidoy
+            Vidoy Universal
           </a>
           <button className="btn btn-secondary-brand px-4 py-2" onClick={scrollToDownloader}>
             Mulai unduh
@@ -62,7 +68,7 @@ function App() {
           Unduh video tanpa batas, lebih cepat dan real-time
         </h1>
         <p className="fs-5 mb-5 mx-auto text-body" style={{ maxWidth: '680px' }}>
-          Alirkan video favorit Anda langsung dari sumbernya. Mendukung format HLS (m3u8) tanpa perlu menyimpannya di disk server terlebih dahulu.
+          Mendukung pengunduhan dari Vidara, dan Streamrizz secara langsung tanpa perlu menyimpannya di server perantara.
         </p>
         <div>
           <button onClick={scrollToDownloader} className="btn btn-primary-brand">
@@ -82,7 +88,7 @@ function App() {
                   <input
                     type="url"
                     className="form-control form-control-custom w-100"
-                    placeholder="https://vdy.to/v/..."
+                    placeholder="https://vidara.to/v/... atau https://vdy.to/..."
                     value={urlInput}
                     onChange={(e) => setUrlInput(e.target.value)}
                     required
@@ -107,10 +113,16 @@ function App() {
               {videoData && (
                 <div className="mt-5 pt-4 border-top border-secondary border-opacity-25">
                   <span className="eyebrow d-block mb-3">Video ditemukan</span>
-                  <div className="row g-4 align-items-center bg-canvas p-3 rounded-3 border border-dark border-opacity-10">
+                  <div className="row g-4 align-items-center bg-canvas p-3 rounded-3 border border-dark border-opacity-10 position-relative">
+                    
+                    {/* Badge Sumber Video */}
+                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-ink text-canvas-soft border border-light p-2 shadow-sm" style={{ zIndex: 10 }}>
+                      Sumber: {videoData.extractor}
+                    </span>
+
                     <div className="col-md-5">
                       {videoData.poster ? (
-                        <img src={videoData.poster} alt="Thumbnail" className="thumbnail-img" />
+                        <img src={videoData.poster} alt="Thumbnail" className="thumbnail-img shadow-sm" />
                       ) : (
                         <div className="thumbnail-img bg-ink d-flex align-items-center justify-content-center text-canvas-soft">
                           <span>No image</span>
@@ -118,11 +130,14 @@ function App() {
                       )}
                     </div>
                     <div className="col-md-7">
-                      <h4 className="mb-2 text-ink" title={videoData.title || 'Tanpa Judul'}>
+                      <h4 className="mb-2 text-ink text-truncate" title={videoData.title || 'Tanpa Judul'}>
                         {videoData.title || 'Tanpa judul'}
                       </h4>
+                      <p className="text-body-mid small mb-2">
+                        Host: {videoData.host}
+                      </p>
                       <p className="text-body-mid small mb-4">
-                        ID: {videoData.id}
+                        Format: {videoData.isDirect ? 'Direct MP4' : 'HLS (.m3u8)'}
                       </p>
                       <button
                         onClick={handleDownload}
@@ -144,27 +159,27 @@ function App() {
         <div className="row text-center g-4">
           <div className="col-md-4">
             <div className="p-3">
-              <h5 className="mb-3">Super cepat</h5>
-              <p className="text-body">Video dialirkan langsung tanpa proses penyimpanan ganda di server.</p>
+              <h5 className="mb-3">Universal Downloader</h5>
+              <p className="text-body">Mendukung ekstraksi tautan dari berbagai platform seperti Vidara dan Vidoy.</p>
             </div>
           </div>
           <div className="col-md-4">
             <div className="p-3">
-              <h5 className="mb-3">Aman & terenkripsi</h5>
-              <p className="text-body">Sistem mengekstrak token secara otomatis dan mengunci proses unduhan.</p>
+              <h5 className="mb-3">Bypass Proteksi</h5>
+              <p className="text-body">Dilengkapi yt-dlp untuk menangani stream video HLS dan ekstensi file yang dienkripsi.</p>
             </div>
           </div>
           <div className="col-md-4">
             <div className="p-3">
-              <h5 className="mb-3">Dukungan HLS</h5>
-              <p className="text-body">Integrasi FFmpeg di balik layar untuk mengonversi stream M3U8 dengan mulus.</p>
+              <h5 className="mb-3">Unduhan Langsung</h5>
+              <p className="text-body">Sistem mampu mengidentifikasi format MP4 langsung untuk proses unduh yang jauh lebih stabil.</p>
             </div>
           </div>
         </div>
       </section>
 
       <footer className="footer-band text-center mt-auto">
-        <span>&copy; {new Date().getFullYear()} Vidoy Downloader by s.fajar15. All rights reserved.</span>
+        <span>&copy; {new Date().getFullYear()} Vidoy Universal by s.fajar15. All rights reserved.</span>
       </footer>
 
     </div>
